@@ -1,6 +1,8 @@
 """
-运行命令：python auto_fill.py --file "res_通信-第一章信息新技术(1).xlsx" --url https://cwgedu.cn/powerTutoring-ui/#/addAnswerSubjectQuestion/index/297/2
-自动上传解析
+自动在题库里面搜索题目并且更新解析
+
+使用方法：
+python website_auto_fill.py --file "res_通信-第一章信息新技术(1).xlsx" --url https://cwgedu.cn/powerTutoring-ui/#/addAnswerSubjectQuestion/index/297/2
 """
 
 import asyncio

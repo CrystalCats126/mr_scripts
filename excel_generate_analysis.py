@@ -1,12 +1,7 @@
 """
-将指定的文件里面的题目生成AI解析
-command: python Generate_Analysis.py --file 2021年国家电网考试真题（计算机类）.xlsx
-"""
-
-"""
 将指定文件夹下的所有Excel题目生成AI解析
 支持多线程并发处理（默认最多10个文件同时进行）
-command: python Generate_Analysis_Multi.py --folder ./data
+command: python excel_generate_analysis.py --folder ./data
 """
 
 import openpyxl
