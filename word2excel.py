@@ -75,9 +75,11 @@ def parse_docx(file_path):
                 # 查找行尾的答案 (如 A, B, ACD)
                 ans_match = re.search(r"([A-F]+)\s*$", text)
                 if ans_match:
-                    ans = ans_match.group(1)
+                    # 获取原始答案字符串 (例如 "ACD")
+                    raw_ans = ans_match.group(1)
+
                     # 简单校验：答案必须由 A-F 组成
-                    if all(c in "ABCDEF" for c in ans):
+                    if all(c in "ABCDEF" for c in raw_ans):
                         # 保存上一题
                         if current_q:
                             questions.append(current_q)
@@ -85,13 +87,18 @@ def parse_docx(file_path):
                         # 提取题目文本（去掉末尾答案）
                         q_text = text[: ans_match.start()].strip()
 
-                        # 判断类型
-                        q_type = ".多选题" if len(ans) > 1 else ".单选题"
+                        # 判断类型 (基于原始答案长度)
+                        q_type = ".多选题" if len(raw_ans) > 1 else ".单选题"
+
+                        # ---【修改点】---
+                        # 将答案格式化：如果是多个字符，用英文分号连接
+                        # 例如: "ACD" -> "A;C;D", "A" -> "A"
+                        formatted_ans = ";".join(list(raw_ans))
 
                         current_q = {
                             "text": q_text,
                             "type": q_type,
-                            "answer": ans,
+                            "answer": formatted_ans,  # 存储格式化后的答案
                             "options": {},
                         }
 
@@ -177,8 +184,11 @@ if __name__ == "__main__":
         questions = parse_docx(input_file)
         print(f"共解析出 {len(questions)} 道题目。")
 
-        df = convert_to_df(questions)
-        df.to_excel(output_file, index=False)
-        print(f"转换成功！文件已保存为: {output_file}")
+        if questions:
+            df = convert_to_df(questions)
+            df.to_excel(output_file, index=False)
+            print(f"转换成功！文件已保存为: {output_file}")
+        else:
+            print("警告: 未解析到任何题目，请检查文档格式。")
     else:
         print(f"错误: 找不到文件 {input_file}，请确保文件在当前目录下。")
