@@ -23,7 +23,7 @@ parser.add_argument(
 parser.add_argument(
     "--workers",
     type=int,
-    default=10,
+    default=25,
     help="同时处理的文件数量（默认10）",
 )
 config = parser.parse_args()
