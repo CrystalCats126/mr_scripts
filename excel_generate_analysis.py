@@ -45,7 +45,54 @@ HEADER_KEYWORDS = {
     "answer": ["正确答案", "答案", "参考答案"],
     "analysis": ["解析", "题目解析"],
 }
+
+
 # ===========================================
+def call_doubao_api(prompt):
+    """调用豆包 (火山引擎) 获取解析"""
+    if not DOUBAO_API_KEY:
+        print("错误: 未配置 DOUBAO_API_KEY")
+        return None
+
+    # 火山引擎 (Ark) 的标准兼容接口地址
+    url = "https://ark.cn-beijing.volces.com/api/v3/chat/completions"
+
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {DOUBAO_API_KEY}",
+    }
+
+    data = {
+        # 注意：这里需要填入【推理接入点 ID】，而不是模型名称
+        "model": DOUBAO_ENDPOINT_ID,
+        "messages": [
+            {
+                "role": "system",
+                "content": "你是一位计算机辅导老师。请针对题目给出解析。回答简洁明了，别说废话。",
+            },
+            {"role": "user", "content": prompt},
+        ],
+        "temperature": 0.7,  # 豆包建议稍微降低一点温度以保证稳定性
+        "stream": False,
+    }
+
+    for attempt in range(3):
+        try:
+            # 增加超时时间，豆包有时候处理较慢
+            res = requests.post(url, headers=headers, json=data, timeout=60)
+
+            if res.status_code == 200:
+                # 豆包的返回结构与 OpenAI/DeepSeek 兼容
+                return res.json()["choices"][0]["message"]["content"]
+            else:
+                # 打印错误详情方便调试
+                print(f"⚠️ 豆包报错: {res.status_code} - {res.text}")
+                time.sleep(1)
+        except Exception as e:
+            print(f"网络请求异常: {e}")
+            time.sleep(1)
+
+    return None
 
 
 def call_deepseek_api(prompt):
@@ -270,9 +317,10 @@ def process_single_excel(file_path):
 
         # 串行调用 API（每个线程内部串行）
         ds_res = call_deepseek_api(prompt_text)
-        ki_res = call_kimi_api(prompt_text)
+        # ki_res = call_kimi_api(prompt_text)
+        doubao_res = call_doubao_api(prompt_text)
         best_analysis = call_tongyi_judge(
-            prompt_text, ds_res, ki_res, original_analysis
+            prompt_text, ds_res, doubao_res, original_analysis
         )
 
         if best_analysis:
