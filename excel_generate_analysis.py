@@ -17,7 +17,7 @@ parser = argparse.ArgumentParser(description="Excel题目解析生成器(多线�
 parser.add_argument(
     "--folder",
     type=str,
-    default="./",
+    default=r"D:\电网\新增题库",
     help="包含Excel文件的文件夹路径",
 )
 parser.add_argument(
@@ -317,10 +317,10 @@ def process_single_excel(file_path):
 
         # 串行调用 API（每个线程内部串行）
         ds_res = call_deepseek_api(prompt_text)
-        # ki_res = call_kimi_api(prompt_text)
-        doubao_res = call_doubao_api(prompt_text)
+        ki_res = call_kimi_api(prompt_text)
+        # doubao_res = call_doubao_api(prompt_text)
         best_analysis = call_tongyi_judge(
-            prompt_text, ds_res, doubao_res, original_analysis
+            prompt_text, ds_res, ki_res, original_analysis
         )
 
         if best_analysis:
